@@ -1,1 +1,3 @@
 # EMMA-Citi_Mobile_Challenge
+
+Android application for Citi Mobile Challenge, still in progess...
