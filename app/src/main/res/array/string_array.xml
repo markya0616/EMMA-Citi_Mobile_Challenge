@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>  
+    <resources>  
+     <array name="testArray">  
+    <item>EMMA</item>  
+    <item>My Account</item>  
+    <item>Rewards for you</item>  
+    <item>ATM/Branch location</item>  
+    <item>Contact us</item>
+    <item>Help</item>
+    <item>Logout</item>
+     </array>
+    </resources>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/listlayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@drawable/message_bar"
+        android:orientation="vertical">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/id_toolbar"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:contentInsetLeft="0dp"
+        app:contentInsetStart="0dp"
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/actionbar_title_color"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    <ImageView
+        android:layout_height="match_parent"
+        android:layout_width="60dp"
+        android:src="@drawable/ic_launcher"
+        />
+    </android.support.v7.widget.Toolbar>
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:layout_weight="1"
+        android:cacheColorHint="#00000000"
+        android:divider="#00000000"
+        android:listSelector="#00000000" >
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/bottom_write_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/listlayout"
+        android:layout_alignParentBottom="true"
+        android:background="@color/textColor">
+
+        <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5sp"
+            android:paddingBottom="5sp"
+            android:paddingLeft="15sp"
+            android:paddingRight="15sp"
+            android:paddingTop="5sp"
+            android:background="@drawable/plus_button"
+            android:layout_gravity="center_vertical"
+             />
+        <EditText
+            android:id="@+id/text"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="5sp"
+            android:layout_weight="1"
+            android:background="@drawable/message_field"
+            android:hint="Write here"
+            android:padding="5sp"
+            android:textColor="@color/textFieldColor" />
+
+        <Button
+            android:id="@+id/send_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5sp"
+            android:background="@drawable/record_button"
+            android:onClick="sendMessage"
+            android:paddingBottom="5sp"
+            android:paddingLeft="15sp"
+            android:paddingRight="15sp"
+            android:paddingTop="5sp"
+             />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/recoder_image"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bottom_write_bar"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:background="@color/white">
+        <ImageView
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_height="200dp"
+            android:layout_width="fill_parent"
+            android:src="@drawable/record"
+            android:onClick="startRecord"
+            />
+    </LinearLayout>
+</LinearLayout>
