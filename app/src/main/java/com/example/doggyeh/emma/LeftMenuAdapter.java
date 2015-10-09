@@ -10,6 +10,8 @@ import android.widget.TextView;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+//Custom class to implement custom row in ListView for navigation drawer
+
 public class LeftMenuAdapter extends BaseAdapter{
 	private Context mContext;
 	public static String[] menulist;

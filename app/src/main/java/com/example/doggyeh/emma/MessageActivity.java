@@ -32,14 +32,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextWatcher;
 import android.text.Editable;
 
-/**
- * MessageActivity is a main Activity to show a ListView containing Message items
- * 
- * @author Adil Soomro
- *
- */
+
+//MessageActivity is a main Activity to ask EMMA questions
+
 public class MessageActivity extends AppCompatActivity {
-	/** Called when the activity is first created. */
 	ListView activityRootView;
 	ArrayList<Message> messages;
 	AwesomeAdapter adapter;
@@ -48,15 +44,16 @@ public class MessageActivity extends AppCompatActivity {
 	static Random rand = new Random();	
 	static String sender = "EMMA";
 	static SQLiteDatabase db;
-	Boolean keyboard = false;
-	Boolean record = false;
-	Boolean record1 = false;
+	Boolean keyboard = false;	//keyboard status
+	Boolean record = false;		//recorder status
+	Boolean record1 = false;	//switch between keyboard and recorder
 	private static final int REQUEST_CODE = 1234;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat);
+		activityRootView = (ListView) findViewById(android.R.id.list);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.id_toolbar);
 		//toolbar.setLogo(R.drawable.ic_launcher);
 		//toolbar.setContentInsetsAbsolute(0, 0);
@@ -65,9 +62,7 @@ public class MessageActivity extends AppCompatActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
-
-		activityRootView = (ListView) findViewById(android.R.id.list);
+		//Change the send icon between SEND and VOICE_INPUT
 		text = (EditText) this.findViewById(R.id.text);
 		text.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -78,11 +73,9 @@ public class MessageActivity extends AppCompatActivity {
 				else
 					sendbutton.setBackgroundResource(R.drawable.record_button);
 			}
-
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
-
 			@Override
 			public void afterTextChanged(Editable s) {
 			}
@@ -97,14 +90,15 @@ public class MessageActivity extends AppCompatActivity {
 		messages = new ArrayList<Message>();
 
 		Cursor c=db.rawQuery("SELECT * FROM message", null);
-		if(c.getCount()==0){	//first start
+		//Hello message from EMMA!
+		if(c.getCount()==0){
 			Message m = new Message("Hi! I'm Emma.", false);
 			messages.add(m);
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage().replaceAll("'", "''")+"');");
 			m = new Message("what can I do for you?", false);
 			messages.add(m);
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage()+"');");
-		}else{	//load previous messages from database
+		}else{
 			while(c.moveToNext()){
 				messages.add(new Message(c.getString(1),c.getInt(0) != 0));
 			}
@@ -116,6 +110,8 @@ public class MessageActivity extends AppCompatActivity {
 		//Log.d("Robin",""+((ListView) findViewById(android.R.id.list)).getChildAt(0));
 		recorder = (LinearLayout)findViewById(R.id.recoder_image);
 
+		//Monitor the keyboard and recorder status and adjust it.
+		//Only one can be show at one time or too crowded.
 		activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 		    @Override
 		    public void onGlobalLayout() {
@@ -126,15 +122,13 @@ public class MessageActivity extends AppCompatActivity {
 					recorder.setVisibility(LinearLayout.GONE);
 				}
 				if (!keyboard) {
-			        if (heightDiff > 500) { // if more than 100 pixels, its probably a keyboard...
+			        if (heightDiff > 500) { // if more than 500 pixels, its probably a keyboard...
 						activityRootView.setSelection(messages.size() - 1);
-			        	//Log.d("Robin",""+activityRootView.getRootView().getHeight()+" , "+activityRootView.getHeight());
 			        	keyboard = true;
 			        }
 		    	}else{
 			        if (heightDiff < 500) {
 			        	//getListView().setSelection(messages.size()-1);
-			        	//Log.d("Robin",""+activityRootView.getRootView().getHeight()+" , "+activityRootView.getHeight());
 			        	keyboard = false;
 			        }
 		    	}
@@ -171,11 +165,10 @@ public class MessageActivity extends AppCompatActivity {
 				record = false;
 				recorder.setVisibility(LinearLayout.GONE);
 			}
-
 		}
-
 	}
 
+	//Voice input
 	public void startRecord(View v)
 	{
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -184,7 +177,6 @@ public class MessageActivity extends AppCompatActivity {
 		intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speaking to EMMA...");
 		startActivityForResult(intent, REQUEST_CODE);
 	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
@@ -196,6 +188,7 @@ public class MessageActivity extends AppCompatActivity {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+
 	private class SendMessage extends AsyncTask<Void, String, String>
 	{
 		@Override
@@ -233,8 +226,6 @@ public class MessageActivity extends AppCompatActivity {
 			addNewMessage(m); // add the orignal message from server.
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage().replaceAll("'","''")+"');");
 		}
-		
-
 	}
 	void addNewMessage(Message m)
 	{

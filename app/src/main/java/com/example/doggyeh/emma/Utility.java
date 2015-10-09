@@ -1,12 +1,5 @@
 package com.example.doggyeh.emma;
 
-/**
- * Utility is a just an ordinary class to have some Utility methods
- * 
- * @author Adil Soomro
- *
- */
-
 public class Utility {
 	//List of colors ;)
 	//public static final String [] sender= new String [] {"Lalit", "RobinHood", "Captain","Vice Captain", "PurpleDroid", "HotVerySpicy", "Dharmendra", "PareshMayani", "Abhi", "SpK", "CapDroid"};

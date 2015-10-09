@@ -11,12 +11,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-/**
- * AwesomeAdapter is a Custom class to implement custom row in ListView
- * 
- * @author Adil Soomro
- *
- */
+
+//AwesomeAdapter is a Custom class to implement custom row in ListView
+
 public class AwesomeAdapter extends BaseAdapter{
 	private Context mContext;
 	private ArrayList<Message> mMessages;

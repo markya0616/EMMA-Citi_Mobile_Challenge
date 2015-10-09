@@ -19,21 +19,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+//Main activity, home page
+
 public class EMMA extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
     private CharSequence mTitle;
-    static int prev = 1;
+    static int prev = 1;    //last selected navigation drawer item
     public static Toolbar toolbar;
-    String[] menuarray;
+    String[] menuarray;     //items for navigation drawer
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +48,6 @@ public class EMMA extends AppCompatActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
     }
 
     @Override
@@ -134,7 +129,6 @@ public class EMMA extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //Log.d("Robin", "" + mTitle);
-
         if (mTitle.equals(getString(R.string.title_section1))){
             getMenuInflater().inflate(R.menu.global, menu);
             ActionBar actionBar = getSupportActionBar();

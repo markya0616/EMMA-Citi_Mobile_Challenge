@@ -1,11 +1,5 @@
 package com.example.doggyeh.emma;
 
-/**
- * Message is a Custom Object to encapsulate message information/fields
- * 
- * @author Adil Soomro
- *
- */
 public class Message {
 	/**
 	 * The content of the message
