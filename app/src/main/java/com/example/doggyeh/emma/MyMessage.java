@@ -1,6 +1,6 @@
 package com.example.doggyeh.emma;
 
-public class Message {
+public class MyMessage {
 	/**
 	 * The content of the message
 	 */
@@ -18,7 +18,7 @@ public class Message {
 	/**
 	 * Constructor to make a Message object
 	 */
-	public Message(String message, boolean isMine) {
+	public MyMessage(String message, boolean isMine) {
 		super();
 		this.message = message;
 		this.isMine = isMine;
@@ -29,7 +29,7 @@ public class Message {
 	 * consider the parameters are swaped from default Message constructor,
 	 *  not a good approach but have to go with it.
 	 */
-	public Message(boolean status, String message) {
+	public MyMessage(boolean status, String message) {
 		super();
 		this.message = message;
 		this.isMine = false;

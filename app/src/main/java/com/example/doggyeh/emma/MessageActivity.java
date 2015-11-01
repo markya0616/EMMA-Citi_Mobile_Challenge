@@ -1,10 +1,24 @@
 package com.example.doggyeh.emma;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
-
+import java.util.Scanner;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -31,19 +45,23 @@ import android.widget.ListView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextWatcher;
 import android.text.Editable;
+import android.os.Message;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 //MessageActivity is a main Activity to ask EMMA questions
 
 public class MessageActivity extends AppCompatActivity {
 	ListView activityRootView;
-	ArrayList<Message> messages;
+	ArrayList<MyMessage> messages;
 	AwesomeAdapter adapter;
 	EditText text;
 	LinearLayout recorder;
 	static Random rand = new Random();	
-	static String sender = "EMMA";
+	static final String sender = "EMMA";
 	static SQLiteDatabase db;
+	static final String TAG = "Robin";
 	Boolean keyboard = false;	//keyboard status
 	Boolean record = false;		//recorder status
 	Boolean record1 = false;	//switch between keyboard and recorder
@@ -87,20 +105,20 @@ public class MessageActivity extends AppCompatActivity {
 		
 		//sender = Utility.sender[rand.nextInt( Utility.sender.length-1)];
 		this.setTitle(sender);
-		messages = new ArrayList<Message>();
+		messages = new ArrayList<MyMessage>();
 
 		Cursor c=db.rawQuery("SELECT * FROM message", null);
 		//Hello message from EMMA!
 		if(c.getCount()==0){
-			Message m = new Message("Hi! I'm Emma.", false);
+			MyMessage m = new MyMessage("Hi! I'm Emma.", false);
 			messages.add(m);
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage().replaceAll("'", "''")+"');");
-			m = new Message("what can I do for you?", false);
+			m = new MyMessage("what can I do for you?", false);
 			messages.add(m);
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage()+"');");
 		}else{
 			while(c.moveToNext()){
-				messages.add(new Message(c.getString(1),c.getInt(0) != 0));
+				messages.add(new MyMessage(c.getString(1),c.getInt(0) != 0));
 			}
 		}
 		adapter = new AwesomeAdapter(this, messages);
@@ -113,31 +131,31 @@ public class MessageActivity extends AppCompatActivity {
 		//Monitor the keyboard and recorder status and adjust it.
 		//Only one can be show at one time or too crowded.
 		activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-		    @Override
-		    public void onGlobalLayout() {
+			@Override
+			public void onGlobalLayout() {
 				//Log.d("Robin",""+activityRootView.getRootView().getHeight()+" , "+activityRootView.getHeight());
 				int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
-				if(heightDiff>1500 && !record1){
+				if (heightDiff > 1500 && !record1) {
 					record = false;
 					recorder.setVisibility(LinearLayout.GONE);
 				}
 				if (!keyboard) {
-			        if (heightDiff > 500) { // if more than 500 pixels, its probably a keyboard...
+					if (heightDiff > 500) { // if more than 500 pixels, its probably a keyboard...
 						activityRootView.setSelection(messages.size() - 1);
-			        	keyboard = true;
-			        }
-		    	}else{
-			        if (heightDiff < 500) {
-			        	//getListView().setSelection(messages.size()-1);
-			        	keyboard = false;
-			        }
-		    	}
+						keyboard = true;
+					}
+				} else {
+					if (heightDiff < 500) {
+						//getListView().setSelection(messages.size()-1);
+						keyboard = false;
+					}
+				}
 				if (record1)
 					record1 = false;
-		     }
+			}
 		});
 	}
-	
+
 	public void sendMessage(View v)
 	{
 		String newMessage = text.getText().toString().trim(); 
@@ -148,10 +166,14 @@ public class MessageActivity extends AppCompatActivity {
 			{
 				messages.remove(messages.size()-1);
 			}
-			Message m = new Message(newMessage, true);
+			MyMessage m = new MyMessage(newMessage, true);
 			addNewMessage(m);
-			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage().replaceAll("'","''")+"');");
-			new SendMessage().execute();
+			db.execSQL("INSERT INTO message VALUES('" + (m.isMine() ? 1 : 0) + "','" + m.getMessage().replaceAll("'", "''") + "');");
+			//new SendMessage().execute();
+
+			//Send message to server
+			new ServerTask().execute(newMessage);
+
 		}else{
 			if(!record){
 				if (keyboard)
@@ -167,6 +189,86 @@ public class MessageActivity extends AppCompatActivity {
 			}
 		}
 	}
+	public static final String serviceUrl="https://doggyeh.pagekite.me/todo/api/v1.0/tasks";
+	public static final int CONNECTION_TIMEOUT = 10000;
+	public static final int DATARETRIEVAL_TIMEOUT = 10000;
+	private class ServerTask extends AsyncTask<String, Integer, String> {
+		@Override
+		protected String doInBackground(String... params) {
+
+				HttpURLConnection urlConnection = null;
+				try {
+
+					// create connection
+					Log.d(TAG,"robin");
+					URL urlToRequest = new URL(serviceUrl);
+					urlConnection = (HttpURLConnection) urlToRequest.openConnection();
+					urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+					urlConnection.setReadTimeout(DATARETRIEVAL_TIMEOUT);
+					urlConnection.setRequestMethod("POST");
+					urlConnection.setDoInput(true);
+					urlConnection.setDoOutput(true);
+					urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+
+					//Create JSONObject here
+					JSONObject jsonParam = new JSONObject();
+					jsonParam.put("question", params[0]);
+
+					OutputStream os = urlConnection.getOutputStream();
+					os.write(jsonParam.toString().getBytes("UTF-8"));
+					os.close();
+					Log.d(TAG,jsonParam.toString());
+
+					// handle issues
+					int statusCode = urlConnection.getResponseCode();
+					if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+						// handle unauthorized (if service requires user login)
+						Log.d(TAG,"robin error1");
+					} else if (statusCode != HttpURLConnection.HTTP_OK) {
+						// handle any other errors, like 404, 500,..
+						Log.d(TAG,"robin error2");
+					}
+
+					// create JSON object from content
+					InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+					JSONObject jobj = new JSONObject(getResponseText(in));
+					Log.d(TAG, jobj.getString("answer"));
+					MyMessage m = new MyMessage(jobj.getString("answer"), false);
+					Message msg = new Message();
+					msg.obj = m;
+					mHandler.sendMessage(msg);
+
+				} catch (MalformedURLException e) {
+					// URL is invalid
+				} catch (SocketTimeoutException e) {
+					// data retrieval or connection timed out
+				} catch (IOException e) {
+					// could not read response body
+					// (could not create input stream)
+				} catch (JSONException e) {
+					// response body is no valid JSON string
+				} finally {
+					if (urlConnection != null) {
+						urlConnection.disconnect();
+					}
+				}
+		return "";
+		}
+	}
+	private static String getResponseText(InputStream inStream) {
+		// very nice trick from
+		// http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
+		return new Scanner(inStream).useDelimiter("\\A").next();
+	}
+
+	Handler mHandler = new Handler(){
+		public void handleMessage(Message msg){
+			MyMessage m = (MyMessage) msg.obj;
+			addNewMessage(m); // add the orignal message from server.
+			db.execSQL("INSERT INTO message VALUES('" + (m.isMine() ? 1 : 0) + "','" + m.getMessage().replaceAll("'", "''") + "');");
+
+		}
+	};
 
 	//Voice input
 	public void startRecord(View v)
@@ -213,7 +315,7 @@ public class MessageActivity extends AppCompatActivity {
 				activityRootView.setSelection(messages.size() - 1);
 			}
 			else{
-				addNewMessage(new Message(true,v[0])); //add new message, if there is no existing status message
+				addNewMessage(new MyMessage(true,v[0])); //add new message, if there is no existing status message
 			}
 		}
 		@Override
@@ -222,12 +324,12 @@ public class MessageActivity extends AppCompatActivity {
 			{
 				messages.remove(messages.size()-1);
 			}
-			Message m = new Message(text, false);
+			MyMessage m = new MyMessage(text, false);
 			addNewMessage(m); // add the orignal message from server.
 			db.execSQL("INSERT INTO message VALUES('"+(m.isMine()?1:0)+"','"+m.getMessage().replaceAll("'","''")+"');");
 		}
 	}
-	void addNewMessage(Message m)
+	void addNewMessage(MyMessage m)
 	{
 		messages.add(m);
 		adapter.notifyDataSetChanged();
