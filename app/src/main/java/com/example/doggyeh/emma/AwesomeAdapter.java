@@ -1,16 +1,13 @@
 package com.example.doggyeh.emma;
 
-import java.util.ArrayList;
 import android.content.Context;
-import android.util.Log;
-import android.graphics.drawable.ColorDrawable;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 //AwesomeAdapter is a Custom class to implement custom row in ListView
 
