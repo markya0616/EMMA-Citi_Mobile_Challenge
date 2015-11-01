@@ -16,11 +16,11 @@ import android.widget.TextView;
 
 public class AwesomeAdapter extends BaseAdapter{
 	private Context mContext;
-	private ArrayList<Message> mMessages;
+	private ArrayList<MyMessage> mMessages;
 
 
 
-	public AwesomeAdapter(Context context, ArrayList<Message> messages) {
+	public AwesomeAdapter(Context context, ArrayList<MyMessage> messages) {
 		super();
 		this.mContext = context;
 		this.mMessages = messages;
@@ -35,7 +35,7 @@ public class AwesomeAdapter extends BaseAdapter{
 	}
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		Message message = (Message) this.getItem(position);
+		MyMessage message = (MyMessage) this.getItem(position);
 
 		ViewHolder holder = new ViewHolder();
 		if(message.isStatusMessage())
